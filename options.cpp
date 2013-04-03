@@ -73,15 +73,27 @@ options::parse( int argc, char** argv )
 		basename = instance().vm["basename"].as<string>()+"_";
 	}
 
+	string front_output = "--front-output="+basename+"front.ngc";
+	string back_output = "--back-output="+basename+"back.ngc";
+	string outline_output = "--outline-output="+basename+"outline.ngc";
+	string drill_output = "--drill-output="+basename+"drill.ngc";
+
 	const char *fake_basename_command_line[] = {
 		"",
-		("--front-output="+basename+"front.ngc").c_str(),
-		("--back-output="+basename+"back.ngc").c_str(),
-		("--outline-output="+basename+"outline.ngc").c_str(),
-		("--drill-output="+basename+"drill.ngc").c_str()
+		front_output.c_str(),
+		back_output.c_str(),
+		outline_output.c_str(),
+		drill_output.c_str()
 	};
 
-	po::store(po::parse_command_line(5, (char**)fake_basename_command_line, generic, style), instance().vm);
+	try {
+		po::store(po::parse_command_line(5, (char**)fake_basename_command_line, generic, style), instance().vm);
+	}
+	catch( std::logic_error& e ) {
+	 	cerr << "Error: You've supplied an invalid parameter.\n"
+		     << "Details: " << e.what() << endl;
+		exit(102);
+	}
 	po::notify(instance().vm);
 }
 
@@ -126,47 +138,47 @@ options::options() : cli_options("command line only options"),
 		;
 
 	cfg_options.add_options()
-		("front",      po::value<string>(), "front side RS274-X .gbr")
-		("back",   po::value<string>(), "back side RS274-X .gbr")
-		("outline",  po::value<string>(), "pcb outline polygon RS274-X .gbr")
-		("drill", po::value<string>(), "Excellon drill file\n")
+		("front",			po::value<string>(), "front side RS274-X .gbr")
+		("back",			po::value<string>(), "back side RS274-X .gbr")
+		("outline",			po::value<string>(), "pcb outline polygon RS274-X .gbr")
+		("drill",			po::value<string>(), "Excellon drill file\n")
 
-		("svg", po::value<string>(), "SVG output file. EXPERIMENTAL\n")
+		("svg",				po::value<string>(), "SVG output file. EXPERIMENTAL\n")
 	
-		("zwork",    po::value<double>(), "milling depth in inches (Z-coordinate while engraving)")
-		("zsafe",      po::value<double>(), "safety height (Z-coordinate during rapid moves)")
-		("offset",   po::value<double>(), "distance between the PCB traces and the end mill path in inches; usually half the isolation width")
-		("mill-feed", po::value<double>(), "feed while isolating in ipm")
-		("mill-speed", po::value<int>(), "spindle rpm when milling")
-		("milldrill",   "drill using the mill head")
-		("extra-passes", po::value<int>(), "specify the the number of extra isolation passes, increasing the isolation width half the tool diameter with each pass\n")
+		("zwork",			po::value<double>(), "milling depth in inches (Z-coordinate while engraving)")
+		("zsafe",			po::value<double>(), "safety height (Z-coordinate during rapid moves)")
+		("offset",			po::value<double>(), "distance between the PCB traces and the end mill path in inches; usually half the isolation width")
+		("mill-feed",		po::value<double>(), "feed while isolating in ipm")
+		("mill-speed",		po::value<int>(), "spindle rpm when milling")
+		("milldrill",   	"drill using the mill head")
+		("extra-passes",	po::value<int>(), "specify the the number of extra isolation passes, increasing the isolation width half the tool diameter with each pass\n")
 
-		("fill-outline", po::value<bool>()->zero_tokens(), "accept a contour instead of a polygon as outline")
-		("outline-width", po::value<double>(), "width of the outline")
-		("cutter-diameter", po::value<double>(), "diameter of the end mill used for cutting out the PCB")
-		("zcut", po::value<double>(), "PCB cutting depth in inches.")
-		("cut-feed", po::value<double>(), "PCB cutting feed")
-		("cut-speed", po::value<int>(), "PCB cutting spindle speed")
-		("cut-infeed", po::value<double>(), "Maximum cutting depth; PCB may be cut in multiple passes\n")
+		("fill-outline",	po::value<bool>()->zero_tokens(), "accept a contour instead of a polygon as outline")
+		("outline-width",	po::value<double>(), "width of the outline")
+		("cutter-diameter",	po::value<double>(), "diameter of the end mill used for cutting out the PCB")
+		("zcut",			po::value<double>(), "PCB cutting depth in inches.")
+		("cut-feed",		po::value<double>(), "PCB cutting feed")
+		("cut-speed",		po::value<int>(), "PCB cutting spindle speed")
+		("cut-infeed",		po::value<double>(), "Maximum cutting depth; PCB may be cut in multiple passes\n")
 
-		("zdrill", po::value<double>(), "drill depth")
-		("zchange", po::value<double>(), "tool changing height")
-		("drill-feed", po::value<double>(), "drill feed; ipm")
-		("drill-speed", po::value<int>(), "spindle rpm when drilling")
-		("drill-front", po::value<bool>()->zero_tokens(), "drill through the front side of board\n")
+		("zdrill",			po::value<double>(), "drill depth")
+		("zchange",			po::value<double>(), "tool changing height")
+		("drill-feed",		po::value<double>(), "drill feed; ipm")
+		("drill-speed",		po::value<int>(), "spindle rpm when drilling")
+		("drill-front",		po::value<bool>()->zero_tokens(), "drill through the front side of board\n")
 
-		("metric",   "use metric units for parameters. does not affect gcode output")
-		("dpi",      po::value<int>()->default_value(1000),   "virtual photoplot resolution")
-		("mirror-absolute",      po::value<bool>()->zero_tokens(),   "mirror back side along absolute zero instead of board center\n")
+		("metric",			"use metric units for parameters. does not affect gcode output")
+		("dpi",				po::value<int>()->default_value(1000),   "virtual photoplot resolution")
+		("mirror-absolute",	po::value<bool>()->zero_tokens(),   "mirror back side along absolute zero instead of board center\n")
 
-		("basename",      po::value<string>(), "prefix for default output file names")
-		("front-output", po::value<string>()->default_value("front.ngc"), "output file for front layer")
-		("back-output", po::value<string>()->default_value("back.ngc"), "output file for back layer")
-		("outline-output", po::value<string>()->default_value("outline.ngc"), "output file for outline")
-		("drill-output", po::value<string>()->default_value("drill.ngc"), "output file for drilling\n")
+		("basename",		po::value<string>(), "prefix for default output file names")
+		("front-output",	po::value<string>()->default_value("front.ngc"), "output file for front layer")
+		("back-output",		po::value<string>()->default_value("back.ngc"), "output file for back layer")
+		("outline-output",	po::value<string>()->default_value("outline.ngc"), "output file for outline")
+		("drill-output",	po::value<string>()->default_value("drill.ngc"), "output file for drilling\n")
 
-		("preamble",      po::value<string>(), "gcode preamble file")
-		("postamble",      po::value<string>(), "gcode postamble file")
+		("preamble",		po::value<string>(), "gcode preamble file")
+		("postamble",		po::value<string>(), "gcode postamble file")
 		;
 }
 
