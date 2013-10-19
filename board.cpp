@@ -42,7 +42,7 @@ Board::get_height()
 	return layers.begin()->second->surface->get_height_in();
 }
 
-uint
+guint
 Board::get_dpi()
 {
 	return dpi;

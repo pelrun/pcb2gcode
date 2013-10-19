@@ -75,11 +75,11 @@ public:
 
 	void createLayers();	// should be private
 
-	uint get_dpi();
+	guint get_dpi();
 
 private:
 	ivalue_t margin;
-	uint dpi;
+	guint dpi;
 	bool fill_outline;
 	double outline_width;
 	ivalue_t min_x;

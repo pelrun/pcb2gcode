@@ -71,7 +71,7 @@ protected:
 	const ivalue_t min_x, max_x, min_y, max_y;
 	const int zero_x, zero_y;
 
-	void make_the_surface(uint width, uint height);
+	void make_the_surface(guint width, guint height);
 
 	// Image Processing Methods
 
@@ -83,7 +83,7 @@ protected:
 
 	std::vector< std::pair<int,int> > fill_all_components();
 	void fill_a_component(int x, int y, guint32 argb);
-	uint grow_a_component(int x, int y, int& contentions);
+	guint grow_a_component(int x, int y, int& contentions);
 	inline bool allow_grow(int x, int y, guint32 ownclr);
 
 	void run_to_border(int& x, int& y);

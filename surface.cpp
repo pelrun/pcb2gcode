@@ -34,7 +34,7 @@ using std::pair;
 // while equal by value, OPAQUE is used for |-ing and BLACK for setting or comparison
 #define BLACK ( RED & GREEN & BLUE )
 
-void Surface::make_the_surface(uint width, uint height)
+void Surface::make_the_surface(guint width, guint height)
 {
 	pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB,
 				     true, 8, width, height);
@@ -523,11 +523,11 @@ guint Surface::grow_a_component(int x, int y, int& contentions)
 	guint8* pixels = cairo_surface->get_data();
 	int stride = cairo_surface->get_stride();
 
-	uint pixels_changed = 0;
+	guint pixels_changed = 0;
 
 	guint32 ownclr = PRC(pixels + x*4 + y*stride);
 
-	for(uint i = 0; i < outside.size(); i++)
+	for(guint i = 0; i < outside.size(); i++)
 	{
 		pair<int,int> coord = outside[i];
 
@@ -576,7 +576,7 @@ void Surface::add_mask( shared_ptr<Surface> mask_surface) {
 
 void Surface::save_debug_image(string message)
 {
-	static uint debug_image_index = 0;
+	static guint debug_image_index = 0;
 
 	opacify(pixbuf);
 	pixbuf->save( (boost::format("outp%1%_%2%.png") % debug_image_index % message).str() , "png");
